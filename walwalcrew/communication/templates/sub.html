@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="icon" href="/static/css/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>준비됐멍?</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+  <link rel="stylesheet" href="/static/css/walwalcss_sub.css" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <nav class="navbar" style="margin-bottom: 3vmin;">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">
+          <div class="brand_flex">
+            <div style="font-weight:bold;color: #3C64B1;font-size: 80%;margin-bottom: 5px;">ARE YOU READY?</div>
+            <div style="font-weight:bold;font-size: 120%;color: black;">준비됐멍?</div>
+          </div>
+        </a>
+      </div>
+      <div id="navbar" class="navbar-right collapse navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">반려견 입양 비기너 테스트</a></li>
+          <li><a href="#">유기견 입양</a></li>
+          <li><a href="#">About US</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <main>
+    <div class="container">
+      <div class="container container-main">
+        <div class="question" id="question"></div>
+        <div class="answer" id="answer"></div>
+
+        <div id="commentTab" style="visibility: hidden;margin-bottom: 10%;opacity:1;animation-name: fadeIn;animation-duration: 5s;">
+          <p style="font-family: Mulish; font-weight: bold; font-size: 15px; color: #5B5A5A; "> 댓글</p>
+
+          <div class ="comment_input">
+            <textarea id="comment_textarea" placeholder="우리 집 강아지는 어떤가요? 댓글을 남겨주세요 !" rows="3"></textarea>
+            <form id="myfrom" method="POST">{% csrf_token %}  
+            <div hidden>
+              <input type="text" id="text" value="" name="text"/>
+              <input type="text" id="nickname" value="" name="nickname"/>
+            </div>
+            <button id="button" type="submit">등록</button>
+            </form>
+          </div>
+        
+          <div class="comment_ranking">
+            <a style="color: #3f3a3a ; padding-right: 10px;"> 추천순 </p> 
+            <a style="color: #999696 ;"> 최신순 </p>
+          </div>
+          {% for tmp in comment %}
+          <div class="comment_item">
+            <div class="comment_info">
+              <a style="font-family: Mulish;font-weight: bold; font-size: 15px; margin: 2px 3px ; color: black;" >{{tmp.nickname}}</a>
+              <a style="font-family: Mulish; font-size: 15px; margin: 2px 3px; color: #817d7d ;">{{tmp.date}}</a>
+            </div>
+          
+            <div class="comment_and_like">
+              <a style="display: flex;word-break:break-all;word-wrap:break-word; align-items: flex-end;color: black;vertical-align:top;">{{tmp.text}}</a>
+                <div class="img_like">
+                  <img id="like" style="width:30px; padding: 2px 3px; " src="../static/img/like.png"/>
+                  <a id="like_number">{{tmp.like}}</a>
+                  <img id="unlike" style="width:30px; transform:rotate(180deg); padding: 2px 3px;" src="../static/img/like.png"/>
+                  <a id="unlike_number">{{tmp.unlike}}</a>
+                </div>
+            </div> 
+          </div>
+          {% endfor %}
+          <button id="delete_button">글 삭제하기</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>
+    $('#myfrom').submit(function(){
+        submit_click();
+        return true;
+    });
+    function submit_click(){
+      var text=document.getElementById("text");
+      var nick=document.getElementById("nickname");
+      text.value= $('textarea#comment_textarea').val();
+      nick.value = '임시';
+    }
+    function load(){
+      location.href="https://www.animal.go.kr/front/community/show.do?boardId=contents&seq=53&menuNo=1000000058";
+    }
+    var category = "";
+    var chk=0;
+    var title = "";
+    var text = "";
+    var intBtn = 0;
+    var answer = new Array;
+    var temp = new Array();
+    var arrBtn = new Array();
+    window.onload=function (){
+      var original_data=JSON.parse('{{ questions | safe }}');
+      category=original_data[0].fields.cateogry;
+      title=original_data[0].fields.title;
+      text=original_data[0].fields.text;
+      answer=original_data[0].fields.answer.split('#');
+      setQuestion();
+    }
+    function setQuestion(){
+      $('#question').empty();
+      $('#answer').empty();
+      var top_html="";
+      var mid_html="";
+      var answer_html="";
+      
+      top_html+='<div class="title"><h1>'+category+'</h1></div>';
+      top_html+='<div class="subtitle"><h3>'+title+'</h3></div>';
+      temp=text.split("#");
+      for(var j=0;j<temp.length;j++){
+        mid_html+='<button id="'+j+'" onclick="item(this.id)">'+temp[j]+'</button>';
+        intBtn=j;
+      }
+      $('#question').append(top_html);
+      $('#answer').append(mid_html);
+      for(var tmp=0;tmp<=intBtn;tmp++){
+        arrBtn.push(document.getElementById(tmp));
+      }
+   }
+    function item(id) {
+      document.getElementById("commentTab").style.visibility = 'visible';
+      if(chk==0){
+        chkAnswer=id;
+        next();
+        chk=1;
+      }  
+    }
+    function prev() {
+    var btn=document.getElementById("prev");
+      if(btn.style.color != "rgb(255, 255, 255)"){
+        btn.style.background="#D3335A";
+        btn.style.color="#ffffff";
+      }
+      else{
+        btn.style.background="#ffffff";
+        btn.style.color="#D3335A";
+      }
+    }
+    function next() {
+      checkanswer(chkAnswer);
+    }
+    function checkanswer(chkAnswer){      
+        arrBtn[0].style.opacity="0";
+        arrBtn[0].style.background="#32bb6b";
+        arrBtn[0].style.border="2px solid #32bb6b";
+        arrBtn[0].style.color="#ffffff"
+        
+        arrBtn[1].style.opacity="0";
+        arrBtn[1].style.background="#32bb6b";
+        arrBtn[1].style.border="2px solid #32bb6b";
+        arrBtn[1].style.color="#ffffff"
+
+        arrBtn[2].style.opacity="0";
+        arrBtn[2].style.background="#32bb6b";
+        arrBtn[2].style.border="2px solid #32bb6b";
+        arrBtn[2].style.color="#ffffff"
+
+        arrBtn[3].style.opacity="0";
+        arrBtn[3].style.background="#32bb6b";
+        arrBtn[3].style.border="2px solid #32bb6b";
+        arrBtn[3].style.color="#ffffff";
+        goNext();
+    }
+    function goNext(){
+      var total = 0;
+      var max = 0;
+      var maxBtn = 0;
+      var percent = new Array();
+      for(var tmpTotal=0;tmpTotal<answer.length;tmpTotal++){
+        total+=parseInt(answer[tmpTotal]);
+        if(answer[tmpTotal]>=max){
+          maxBtn=tmpTotal;
+        }
+      }
+      for(var tmpPercent=0;tmpPercent<answer.length;tmpPercent++){
+        percent.push((parseInt(answer[tmpPercent])/total)*100);
+      }
+      for(var tmpInt=0;tmpInt<arrBtn.length;tmpInt++){
+        var strItem=arrBtn[tmpInt].innerHTML;
+        setButton(strItem,tmpInt,0);
+      }
+      arrBtn[maxBtn].style.opacity=1;
+    }
+    function setButton(strItem,tmpInt,cnt) 
+    {
+        arrBtn[tmpInt].style.opacity=(parseInt(answer[tmpInt])/40).toFixed(2);
+        arrBtn[tmpInt].innerHTML=strItem + " : " + answer[tmpInt]+"%";
+    }
+  </script>
+</body>
+</html>
