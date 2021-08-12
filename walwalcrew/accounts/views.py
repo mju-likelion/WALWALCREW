@@ -14,7 +14,7 @@ import base64
 from .models import authentication
 import string 
 import random 
-import datetime
+from datetime import datetime
 from django.shortcuts import get_object_or_404, render
 
 def aboutus(request):
@@ -44,14 +44,14 @@ def main(request):
 
 def kakaoLoginLogic(request):
     _restApiKey = '37c9aa7740e5099865e96d249270858f' # 입력필요
-    _redirectUrl = 'http://127.0.0.1:8000/kakaoLoginLogicRedirect/'
+    _redirectUrl = 'http://walwalcrew.com/kakaoLoginLogicRedirect/'
     _url = f'https://kauth.kakao.com/oauth/authorize?client_id={_restApiKey}&redirect_uri={_redirectUrl}&response_type=code'
     return redirect(_url)
 
 def kakaoLoginLogicRedirect(request):
     _qs = request.GET['code']
     _restApiKey = '37c9aa7740e5099865e96d249270858f' # 입력필요
-    _redirect_uri = 'http://127.0.0.1:8000/kakaoLoginLogicRedirect/'
+    _redirect_uri = 'http://walwalcrew.com/kakaoLoginLogicRedirect/'
     _url = f'https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id={_restApiKey}&redirect_uri={_redirect_uri}&code={_qs}'
     _res = requests.post(_url)
     _result = _res.json()
@@ -136,7 +136,7 @@ def question_pass(request):
             result += random.choice(string_pool) 
 
         module_dir = os.path.dirname(__file__)
-        text1 = "DOG ADOPTION CERTIFICATE"
+        text1 = "Dog adoption certificate"
         text2 = datetime.today().strftime("%Y%m%d")
         text3 = result
         text4 = "WalWal Sailor"
@@ -162,5 +162,5 @@ def question_pass(request):
 
         png_img = cv2.imencode('.png', img)
         b64_string = base64.b64encode(png_img[1]).decode('utf-8')
-    return render(request,'pass.html',{'img':b64_string,"check":_context})
+    return render(request,'pass.html',{'img':b64_string,"check":_context['check']})
         
